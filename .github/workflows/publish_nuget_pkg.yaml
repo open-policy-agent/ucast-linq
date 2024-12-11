@@ -7,11 +7,6 @@ on:
       - "main"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    inputs:
-      force_publish:
-        description: "Ignore checks and attempt to publish to NuGet."
-        type: boolean
-        default: false
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -42,13 +37,12 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
-      - name: Get latest version from NuGet
-        id: nuget_version
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.force_publish == 'false' }}
-        run: |
-          $latestVersion = (Invoke-WebRequest -Uri "https://api.nuget.org/v3-flatcontainer/styra.ucast.linq/index.json" | ConvertFrom-Json).versions[-1]
-          echo "LATEST_VERSION=$latestVersion" >> $env:GITHUB_OUTPUT
-        shell: pwsh
+      # - name: Get latest version from NuGet
+      #   id: nuget_version
+      #   run: |
+      #     $latestVersion = (Invoke-WebRequest -Uri "https://api.nuget.org/v3-flatcontainer/styra.ucast.linq/index.json" | ConvertFrom-Json).versions[-1]
+      #     echo "LATEST_VERSION=$latestVersion" >> $env:GITHUB_OUTPUT
+      #   shell: pwsh
 
       - name: Get current version
         id: current_version
@@ -61,15 +55,7 @@ jobs:
         run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }} --no-build
 
       - name: Publish NuGet package
-        if: ${{ inputs.force_publish != 'true' && steps.nuget_version.outputs.LATEST_VERSION != steps.current_version.outputs.CURRENT_VERSION }}
-        run: |
-          foreach($file in (Get-ChildItem "${{ env.NuGetDirectory }}" -Filter *.nupkg)) {
-            dotnet nuget push $file --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
-          }
-        shell: pwsh
-
-      - name: Force Publish NuGet package
-        if: ${{ inputs.force_publish == 'true' }}
+        #if: ${{ steps.nuget_version.outputs.LATEST_VERSION != steps.current_version.outputs.CURRENT_VERSION }}
         run: |
           foreach($file in (Get-ChildItem "${{ env.NuGetDirectory }}" -Filter *.nupkg)) {
             dotnet nuget push $file --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
