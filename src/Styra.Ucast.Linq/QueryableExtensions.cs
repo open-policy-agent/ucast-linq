@@ -16,7 +16,7 @@ public static class QueryableExtensions
     /// <param name="root">The top-level UCAST node to build a LINQ Expression tree from.</param>
     /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
     /// <returns>Result, an <see cref="IQueryable{T}" />.</returns>
-    public static IQueryable<T> ApplyUCASTFilter<T>(this IQueryable<T> source, UCASTNode root, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
+    public static IQueryable<T> ApplyUCASTFilter<T>(this IQueryable<T> source, UCASTNode root, MappingConfiguration<T> mapper)
     {
         var parameter = Expression.Parameter(typeof(T), "x");
         var expression = BuildExpression<T>(root, parameter, mapper);
@@ -31,7 +31,7 @@ public static class QueryableExtensions
     /// <param name="parameter">LINQ data source (same type as <typeparamref name="T"/>).</param>
     /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
     /// <returns>Result, a LINQ Expression.</returns>
-    public static Expression BuildExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
+    public static Expression BuildExpression<T>(UCASTNode node, ParameterExpression parameter, MappingConfiguration<T> mapper)
     {
         // Switch expression:
         return node.Type.ToLower() switch
@@ -58,7 +58,7 @@ public static class QueryableExtensions
     /// <param name="parameter">LINQ data source (same type as <typeparamref name="T"/>).</param>
     /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
     /// <returns>Result, a LINQ Expression (Usually a BinaryExpression).</returns>
-    private static Expression BuildFieldExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
+    private static Expression BuildFieldExpression<T>(UCASTNode node, ParameterExpression parameter, MappingConfiguration<T> mapper)
     {
         var property = mapper[node.Field!](parameter); // Note: This will throw a KeyNotFoundException if the field name does not exist.
         Expression value = Expression.Constant(node.Value);
@@ -104,7 +104,7 @@ public static class QueryableExtensions
     /// <param name="parameter">LINQ data source (same type as <typeparamref name="T"/>).</param>
     /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
     /// <returns>Result, an aggregate LINQ Expression.</returns>
-    private static Expression BuildFieldInExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
+    private static Expression BuildFieldInExpression<T>(UCASTNode node, ParameterExpression parameter, MappingConfiguration<T> mapper)
     {
         if (node.Value is null)
         {
@@ -137,7 +137,7 @@ public static class QueryableExtensions
     /// <param name="parameter">LINQ data source (same type as <typeparamref name="T"/>).</param>
     /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
     /// <returns>Result, an aggregate LINQ Expression.</returns>
-    private static Expression BuildCompoundExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
+    private static Expression BuildCompoundExpression<T>(UCASTNode node, ParameterExpression parameter, MappingConfiguration<T> mapper)
     {
         if (node.Value is null)
         {
@@ -154,73 +154,5 @@ public static class QueryableExtensions
             "or" => childExpressions.Aggregate(Expression.OrElse),
             _ => throw new ArgumentException($"Unknown compound operator: {node.Op}"),
         };
-    }
-
-    /// <summary>
-    ///   <para>
-    ///   BuildDefaultMapperDictionary constructs a Dictionary mapping UCAST
-    ///   property names to lambda functions.<br />
-    ///   The lambda functions allow late-binding a LINQ data source into LINQ
-    ///   Property expression lookups, which are used extensively when building
-    ///   conditions over EF Core models.
-    ///   </para>
-    ///   <para>
-    ///   When deciding on names for data source properties, we follow a small set
-    ///   of default construction rules:
-    ///   <list type="bullet">
-    ///    <item>Example.Id -> "example.id"</item>
-    ///    <item>Example.LastUpdated -> "example.last_updated"</item>
-    ///    <item>Example.UserNavigation.Id -> "example.user.id"</item>
-    ///   </list>
-    ///   </para>
-    /// </summary>
-    /// <param name="prefix">Name of the LINQ data source, as it will appear in UCAST field references. Used as a prefix for the generated property mappings.</param>
-    /// <returns>Result, a Dictionary.</returns>
-    public static Dictionary<string, Func<ParameterExpression, Expression>> BuildDefaultMapperDictionary<T>(string prefix = "")
-    {
-        var result = new Dictionary<string, Func<ParameterExpression, Expression>>();
-        var properties = typeof(T).GetProperties();
-        foreach (var property in properties)
-        {
-            var propertyName = property.Name;
-            // Normal properties, or a property just named "navigation" (case invariant) should be processed normally.
-            if (!propertyName.EndsWith("Navigation") || propertyName.ToLower() == "Navigation")
-            {
-                propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
-                result[propertyName] = param => Expression.Property(param, property.Name);
-                continue;
-            }
-            // Implicit else: Properties with the "Navigation" suffix are
-            // usually ORM tooling for foreign key/entity lookups in EF Core. We
-            // indirect one level, and enumerate the non-Navigation properties
-            // of that type.
-            propertyName = property.Name[..^"Navigation".Length];
-            propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
-
-            Type memberType = property.PropertyType;
-            var memberProperties = memberType.GetProperties();
-            foreach (var memberProp in memberProperties)
-            {
-                // Skip cases like "Ticket.CustomerNavigation.TenantNavigation".
-                if (memberProp.Name.EndsWith("Navigation") && memberProp.Name.ToLower() != "Navigation")
-                {
-                    continue;
-                }
-                var memberPropertyName = memberProp.Name.ToSnakeCase();
-                result[$"{propertyName}.{memberPropertyName}"] = param => Expression.Property(Expression.Property(param, property.Name), memberPropertyName);
-            }
-        }
-
-        return result;
-    }
-
-    private static string ToSnakeCase(this string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            return input;
-        }
-
-        return string.Concat(input.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
     }
 }

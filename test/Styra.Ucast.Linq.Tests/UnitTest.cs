@@ -1,12 +1,10 @@
 // This file contains basic unit tests for the library.
-using System.Linq.Expressions;
-
 namespace Styra.Ucast.Linq.Tests;
 
 // Field operations, across all JSON primitive types (null, bool, int, double, string), with expected results from equivalent LINQ queries.
 public class UnitTestFieldExprs
 {
-    public static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
 
     [Theory]
     [MemberData(nameof(EqTestData))]
@@ -148,7 +146,7 @@ public class UnitTestFieldExprs
 // Compound operations, with expected results from equivalent LINQ queries.
 public class UnitTestCompoundExprs
 {
-    public static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
 
     [Theory]
     [MemberData(nameof(AndTestData))]
@@ -185,26 +183,26 @@ public class UnitTestCompoundExprs
     public static IEnumerable<object[]> AndTestData()
     {
         yield return new object[] { new UCASTNode { Type = "compound", Op = "and", Value = new List<UCASTNode>{
-            new UCASTNode { Type = "field", Op = "eq", Field = "data.name", Value = "Lake Beta" },
-            new UCASTNode { Type = "field", Op = "eq", Field = "data.flood_stage", Value = true },
+            new() { Type = "field", Op = "eq", Field = "data.name", Value = "Lake Beta" },
+            new() { Type = "field", Op = "eq", Field = "data.flood_stage", Value = true },
         } }, testdata.Where(d => d.Name == "Lake Beta" && d.FloodStage).ToList() };
     }
 
     public static IEnumerable<object[]> OrTestData()
     {
         yield return new object[] { new UCASTNode { Type = "compound", Op = "or", Value = new List<UCASTNode>{
-            new UCASTNode { Type = "field", Op = "eq", Field = "data.name", Value = "Lake Beta" },
-            new UCASTNode { Type = "field", Op = "eq", Field = "data.flood_stage", Value = false },
+            new() { Type = "field", Op = "eq", Field = "data.name", Value = "Lake Beta" },
+            new() { Type = "field", Op = "eq", Field = "data.flood_stage", Value = false },
         } }, testdata.Where(d => d.Name == "Lake Beta" || !d.FloodStage).ToList() };
     }
 
     public static IEnumerable<object[]> AndNestedTestData()
     {
         yield return new object[] { new UCASTNode { Type = "compound", Op = "and", Value = new List<UCASTNode>{
-            new UCASTNode { Type = "field", Op = "eq", Field = "data.id", Value = 2 },
-            new UCASTNode { Type = "compound", Op = "or", Value = new List<UCASTNode>{
-                new UCASTNode { Type = "field", Op = "ge", Field = "data.water_level_meters", Value = 2.5 },
-                new UCASTNode { Type = "field", Op = "eq", Field = "data.flood_stage", Value = false },
+            new() { Type = "field", Op = "eq", Field = "data.id", Value = 2 },
+            new() { Type = "compound", Op = "or", Value = new List<UCASTNode>{
+                new() { Type = "field", Op = "ge", Field = "data.water_level_meters", Value = 2.5 },
+                new() { Type = "field", Op = "eq", Field = "data.flood_stage", Value = false },
             } },
 
         } }, testdata.Where(d => d.Id == 2 && (d.WaterLevelMeters >= 2.5 || !d.FloodStage)).ToList() };
@@ -213,10 +211,10 @@ public class UnitTestCompoundExprs
     public static IEnumerable<object[]> OrNestedTestData()
     {
         yield return new object[] { new UCASTNode { Type = "compound", Op = "or", Value = new List<UCASTNode>{
-            new UCASTNode { Type = "field", Op = "eq", Field = "data.id", Value = 2 },
-            new UCASTNode { Type = "compound", Op = "and", Value = new List<UCASTNode>{
-                new UCASTNode { Type = "field", Op = "ge", Field = "data.water_level_meters", Value = 2.5 },
-                new UCASTNode { Type = "field", Op = "eq", Field = "data.flood_stage", Value = false },
+            new() { Type = "field", Op = "eq", Field = "data.id", Value = 2 },
+            new() { Type = "compound", Op = "and", Value = new List<UCASTNode>{
+                new() { Type = "field", Op = "ge", Field = "data.water_level_meters", Value = 2.5 },
+                new() { Type = "field", Op = "eq", Field = "data.flood_stage", Value = false },
             } },
 
         } }, testdata.Where(d => d.Id == 2 || (d.WaterLevelMeters >= 2.5 && !d.FloodStage)).ToList() };
@@ -231,32 +229,50 @@ public class UnitTestREADMEExample
     public void TestREADMEExample()
     {
         int[] numbers = { -1523, 1894, -456, 789, -1002, 345, -1789, 567, 1234, -890, 123, -1456, 1678, -234, 567, -1890, 901, -345, 1567, -789 };
-        List<SimpleRecord> collection = numbers.Select(n => new SimpleRecord(n)).ToList();
+        List<SimpleRecord> collection = [.. numbers.Select(n => new SimpleRecord(n))];
         var expected = collection.Where(x => x.Value >= 1500 || (x.Value < 400 && (x.Value > 0 || x.Value < -1500))).OrderBy(x => x.Value).ToList();
         var conditions = new UCASTNode
         {
             Type = "compound",
             Op = "or",
             Value = new List<UCASTNode>{
-            new UCASTNode { Type = "field", Op = "ge", Field = "r.value", Value = 1500 },
-            new UCASTNode { Type = "compound", Op = "and", Value = new List<UCASTNode>{
-                new UCASTNode { Type = "field", Op = "lt", Field = "r.value", Value = 400 },
-                new UCASTNode { Type = "compound", Op = "or", Value = new List<UCASTNode>{
-                    new UCASTNode { Type = "field", Op = "gt", Field = "r.value", Value = 0 },
-                    new UCASTNode { Type = "field", Op = "lt", Field = "r.value", Value = -1500 },
+            new() { Type = "field", Op = "ge", Field = "r.value", Value = 1500 },
+            new() { Type = "compound", Op = "and", Value = new List<UCASTNode>{
+                new() { Type = "field", Op = "lt", Field = "r.value", Value = 400 },
+                new() { Type = "compound", Op = "or", Value = new List<UCASTNode>{
+                    new() { Type = "field", Op = "gt", Field = "r.value", Value = 0 },
+                    new() { Type = "field", Op = "lt", Field = "r.value", Value = -1500 },
                 } },
             } },
         }
         };
-        var result = collection.AsQueryable().ApplyUCASTFilter(conditions, QueryableExtensions.BuildDefaultMapperDictionary<SimpleRecord>("r")).OrderBy(x => x.Value).ToList();
+        var result = collection.AsQueryable().ApplyUCASTFilter(conditions, new MappingConfiguration<SimpleRecord>(prefix: "r")).OrderBy(x => x.Value).ToList();
         Assert.Equivalent(expected, result, true);
+    }
+}
+
+public class UnitTestMasking
+{
+    private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+
+    [Fact]
+    public void TestMaskingReplace()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "data.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        var maskedList = testdata.MaskElements(maskingRules, UnitTestDataSource.HydrologyDataMapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
     }
 }
 
 // AI-generated, used to provide a dataset for LINQ queries.
 public class UnitTestDataSource
 {
-    public static Dictionary<string, Func<ParameterExpression, Expression>> HydrologyDataMapping = QueryableExtensions.BuildDefaultMapperDictionary<HydrologyData>("data");
+    public static readonly MappingConfiguration<HydrologyData> HydrologyDataMapping = new(prefix: "data");
+
     public class HydrologyData
     {
         public int Id { get; set; }
