@@ -7,7 +7,15 @@ namespace Styra.Ucast.Linq;
 
 public static class EnumerableExtension
 {
-    public static T ShallowClone<T>(T source)
+    /// <summary>
+    /// Allows shallow cloning an object without requiring serializing and
+    /// deserializing the object.
+    /// </summary>
+    /// <typeparam name="T">The type of the source object.</typeparam>
+    /// <param name="source">The object to clone.</param>
+    /// <returns>A shallow clone of the source object.</returns>
+    /// <exception cref="ArgumentException"></exception>
+    private static T ShallowClone<T>(T source)
     {
         if (source == null) return default!; // Don't care, currently.
 
@@ -41,6 +49,15 @@ public static class EnumerableExtension
 
         throw new ArgumentException($"Unable to clone type {type.Name}");
     }
+
+    /// <summary>
+    /// Mask fields on a single object. This is how individual objects are masked in a collection.
+    /// </summary>
+    /// <typeparam name="T">The type of the source object.</typeparam>
+    /// <param name="source">The object whose fields will be masked.</param>
+    /// <param name="maskingRules">A dictionary mapping UCAST field names to column masking functions.</param>
+    /// <param name="config">A name mapping config, allowing easy translation of UCAST field names to object fields.</param>
+    /// <returns>A shallow clone of the source object, with all masks applied.</returns>
     private static T MaskElement<T>(this T source, Dictionary<string, MaskingFunc> maskingRules, MappingConfiguration<T> config)
     {
         T result = ShallowClone(source);
@@ -58,6 +75,14 @@ public static class EnumerableExtension
         return result;
     }
 
+    /// <summary>
+    /// Masks fields on every element in a collection, using a Dictionary of masks, and a name mapping.
+    /// </summary>
+    /// <typeparam name="T">The type of the source collection's elements.</typeparam>
+    /// <param name="source">The collection whose elements' fields will be masked.</param>
+    /// <param name="maskingRules">A dictionary mapping UCAST field names to column masking functions.</param>
+    /// <param name="config">A name mapping config, allowing easy translation of UCAST field names to object fields.</param>
+    /// <returns>A new collection, containing shallow clones of the source collection's object, with all masks applied to each object.</returns>
     public static IEnumerable<T> MaskElements<T>(this IEnumerable<T> source, Dictionary<string, MaskingFunc>? maskingRules, MappingConfiguration<T> config)
     {
         if (maskingRules is null)

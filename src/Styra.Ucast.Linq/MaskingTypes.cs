@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 
 namespace Styra.Ucast.Linq;
 
+/// <summary>
+/// The JSON wrapper object for column masking responses.
+/// </summary>
 public struct MaskResult
 {
     [JsonProperty("masks")]
@@ -15,6 +18,10 @@ public struct MaskResult
     }
 }
 
+/// <summary>
+/// JSON object describing which column masking function to use, along with any
+/// relevant parameter values for it to use.
+/// </summary>
 public struct MaskingFunc
 {
     [JsonProperty("replace", NullValueHandling = NullValueHandling.Ignore)]

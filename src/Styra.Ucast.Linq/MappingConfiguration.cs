@@ -7,7 +7,8 @@ namespace Styra.Ucast.Linq;
 public class NameToLINQExpressionConfiguration : Dictionary<string, Func<ParameterExpression, Expression>>;
 
 /// <summary>
-/// This type helps wrap up the complexities of building LINQ expressions filtering, and for generating dynamic property lookups.
+/// This type helps wrap up the complexities of building LINQ expressions
+/// filtering, and for generating dynamic property lookups.
 /// </summary>
 /// <typeparam name="T">The type to build a name mapping config over.</typeparam>
 public class MappingConfiguration<T>
@@ -75,6 +76,19 @@ public class MappingConfiguration<T>
     }
 
     /// <summary>
+    /// Indexer method providing direct access, as if this class were a dictionary.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public Func<ParameterExpression, Expression> this[string name]
+    {
+        get
+        {
+            return linqMappingsCache[name];
+        }
+    }
+
+    /// <summary>
     /// Retrieves an object property dynamically, given the UCAST field name.
     /// </summary>
     /// <returns>
@@ -106,19 +120,11 @@ public class MappingConfiguration<T>
             prop?.SetValue(source, value);
         }
     }
-
-    // Allows direct indexing during filtering, as if this class were a dictionary.
-    public Func<ParameterExpression, Expression> this[string name]
-    {
-        get
-        {
-            return linqMappingsCache[name];
-        }
-    }
-
 }
-
-// Adds extensions to the name mapping logic, specific to Entity Framework Core model classes.
+/// <summary>
+/// Adds extensions to the name mapping logic, specific to Entity Framework Core model classes.
+/// </summary>
+/// <typeparam name="T">The type to build a name mapping config over.</typeparam>
 public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
 {
     /// <summary>
