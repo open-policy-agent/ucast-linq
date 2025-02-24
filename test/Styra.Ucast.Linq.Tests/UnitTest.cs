@@ -4,7 +4,7 @@ namespace Styra.Ucast.Linq.Tests;
 // Field operations, across all JSON primitive types (null, bool, int, double, string), with expected results from equivalent LINQ queries.
 public class UnitTestFieldExprs
 {
-    public static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
 
     [Theory]
     [MemberData(nameof(EqTestData))]
@@ -146,7 +146,7 @@ public class UnitTestFieldExprs
 // Compound operations, with expected results from equivalent LINQ queries.
 public class UnitTestCompoundExprs
 {
-    public static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
 
     [Theory]
     [MemberData(nameof(AndTestData))]
@@ -248,6 +248,23 @@ public class UnitTestREADMEExample
         };
         var result = collection.AsQueryable().ApplyUCASTFilter(conditions, new MappingConfiguration<SimpleRecord>(prefix: "r")).OrderBy(x => x.Value).ToList();
         Assert.Equivalent(expected, result, true);
+    }
+}
+
+public class UnitTestMasking
+{
+    private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+
+    [Fact]
+    public void TestMaskingReplace()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "data.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        var maskedList = testdata.MaskElements(maskingRules, UnitTestDataSource.HydrologyDataMapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
     }
 }
 
