@@ -5,12 +5,13 @@ namespace Styra.Ucast.Linq.Tests;
 public class UnitTestFieldExprs
 {
     private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Theory]
     [MemberData(nameof(EqTestData))]
     public void TestEq(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -18,7 +19,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(NeTestData))]
     public void TestNe(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -26,7 +27,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(GtTestData))]
     public void TestGt(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -34,7 +35,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(GeTestData))]
     public void TestGe(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -42,7 +43,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(LtTestData))]
     public void TestLt(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -50,7 +51,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(LeTestData))]
     public void TestLe(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -58,7 +59,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(InTestData))]
     public void TestIn(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -66,7 +67,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(NinTestData))]
     public void TestNin(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(result, expected);
     }
 
@@ -147,12 +148,13 @@ public class UnitTestFieldExprs
 public class UnitTestCompoundExprs
 {
     private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Theory]
     [MemberData(nameof(AndTestData))]
     public void TestAnd(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -160,7 +162,7 @@ public class UnitTestCompoundExprs
     [MemberData(nameof(OrTestData))]
     public void TestOr(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -168,7 +170,7 @@ public class UnitTestCompoundExprs
     [MemberData(nameof(AndNestedTestData))]
     public void TestAndNested(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -176,7 +178,7 @@ public class UnitTestCompoundExprs
     [MemberData(nameof(OrNestedTestData))]
     public void TestOrNested(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -254,6 +256,7 @@ public class UnitTestREADMEExample
 public class UnitTestMasking
 {
     private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Fact]
     public void TestMaskingReplace()
@@ -263,7 +266,55 @@ public class UnitTestMasking
             { "data.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
         };
 
-        var maskedList = testdata.MaskElements(maskingRules, UnitTestDataSource.HydrologyDataMapping);
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
+
+    [Fact]
+    public void TestMaskingReplaceWithNamesToProperties()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "hydro.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.name", "data.name"},
+        }, "data");
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
+}
+
+public class UnitTestMaskingEFCore
+{
+    private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
+
+    [Fact]
+    public void TestMaskingReplace()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "data.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
+
+    [Fact]
+    public void TestMaskingReplaceWithNamesToProperties()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "hydro.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.name", "data.name"},
+        }, "data");
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
         Assert.All(maskedList, item => Assert.Equal("***", item.Name));
     }
 }
@@ -271,8 +322,6 @@ public class UnitTestMasking
 // AI-generated, used to provide a dataset for LINQ queries.
 public class UnitTestDataSource
 {
-    public static readonly MappingConfiguration<HydrologyData> HydrologyDataMapping = new(prefix: "data");
-
     public class HydrologyData
     {
         public int Id { get; set; }

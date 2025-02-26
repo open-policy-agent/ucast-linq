@@ -78,7 +78,7 @@ public class MappingConfiguration<T>
     /// <summary>
     /// Indexer method providing direct access, as if this class were a dictionary.
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="name">The UCAST field name to look up.</param>
     /// <returns></returns>
     public Func<ParameterExpression, Expression> this[string name]
     {
@@ -86,6 +86,17 @@ public class MappingConfiguration<T>
         {
             return linqMappingsCache[name];
         }
+    }
+
+    /// <summary>
+    /// Removes a mapping, given the UCAST field name.
+    /// </summary>
+    /// <param name="name">The UCAST field name to attempt to remove.</param>
+    /// <returns></returns>
+    public bool Remove(string name)
+    {
+        nameMappings.Remove(name);
+        return linqMappingsCache.Remove(name);
     }
 
     /// <summary>
@@ -147,7 +158,7 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
     /// </summary>
     /// <param name="namesToProperties">A dictionary, mapping UCAST field names to property lookups in the object.</param>
     /// <param name="prefix">Name of the LINQ data source, as it will appear in UCAST field references. Used as a prefix for the generated property mappings.</param>
-    public EFCoreMappingConfiguration(Dictionary<string, string> namesToProperties, string? prefix = null) : base(namesToProperties)
+    public EFCoreMappingConfiguration(Dictionary<string, string>? namesToProperties = null, string? prefix = null) : base(namesToProperties, prefix)
     {
         var properties = typeof(T).GetProperties();
         foreach (var property in properties)
