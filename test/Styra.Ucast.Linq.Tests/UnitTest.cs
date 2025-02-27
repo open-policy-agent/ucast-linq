@@ -144,6 +144,62 @@ public class UnitTestFieldExprs
     }
 }
 
+public class UnitTestFieldExprsWithCustomNameBinding
+{
+    private static readonly List<UnitTestDataSource.HydrologyData> hydrologyTestData = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.Ticket> ticketTestData = UnitTestDataSource.GetTickets();
+
+    [Theory]
+    [MemberData(nameof(NinTestData))]
+    public void TestNinWithCustomMapping(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
+    {
+        MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.id", "data.id"},
+            {"hydro.name", "data.name"},
+            {"hydro.flood_stage", "data.flood_stage"},
+            {"hydro.water_level_meters", "data.water_level_meters"},
+        }, "data");
+        var result = hydrologyTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
+    [Theory]
+    [MemberData(nameof(NestedNinTestData))]
+    public void TestNestedNinWithCustomMapping(UCASTNode node, List<UnitTestDataSource.Ticket> expected)
+    {
+        MappingConfiguration<UnitTestDataSource.Ticket> mapping = new(new Dictionary<string, string> {
+            {"t.id", "ticket.id"},
+            {"c.id", "ticket.customer.id"},
+            {"c.name", "ticket.customer.name"},
+        }, "ticket");
+        var result = ticketTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
+    public static IEnumerable<object[]> NinTestData()
+    {
+        {
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.name", Value = new List<object>() { null! } }, hydrologyTestData.Where(d => !new List<object>() { null! }.Contains(d.Name!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.name", Value = new List<object>() { "River Alpha", "Lake Beta" } }, hydrologyTestData.Where(d => !new List<object> { "River Alpha", "Lake Beta" }.Contains(d.Name!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.id", Value = new List<object>() { 2, 5 } }, hydrologyTestData.Where(d => !new List<object>() { 2, 5 }.Contains(d.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.id", Value = new List<object>() { (long)2, (long)5 } }, hydrologyTestData.Where(d => !new List<object>() { (long)2, (long)5 }.Contains((long)d.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.flood_stage", Value = new List<object>() { true } }, hydrologyTestData.Where(d => !new List<object>() { true }.Contains(d.FloodStage)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.water_level_meters", Value = new List<object>() { 2.5, 5.8 } }, hydrologyTestData.Where(d => !new List<object>() { 2.5, 5.8 }.Contains(d.WaterLevelMeters)).ToList() };
+        }
+    }
+
+    public static IEnumerable<object[]> NestedNinTestData()
+    {
+        {
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "t.id", Value = new List<object>() { 1, 3 } }, ticketTestData.Where(d => !new List<object>() { 1, 3 }.Contains(d.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "ticket.description", Value = new List<object>() { null! } }, ticketTestData.Where(d => !new List<object>() { null! }.Contains(d.Description!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "c.name", Value = new List<object>() { "John Doe", "Jane Smith" } }, ticketTestData.Where(d => !new List<object> { "John Doe", "Jane Smith" }.Contains(d.Customer.Name!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "c.id", Value = new List<object>() { 2, 5 } }, ticketTestData.Where(d => !new List<object>() { 2, 5 }.Contains(d.Customer.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "c.id", Value = new List<object>() { (long)2, (long)5 } }, ticketTestData.Where(d => !new List<object>() { (long)2, (long)5 }.Contains((long)d.Customer.Id)).ToList() };
+        }
+    }
+}
+
 // Compound operations, with expected results from equivalent LINQ queries.
 public class UnitTestCompoundExprs
 {
@@ -342,6 +398,31 @@ public class UnitTestDataSource
             new HydrologyData { Id = 5, Name = null, LastUpdated = new DateTime(2024, 12, 6, 18, 30, 0), FloodStage = true, WaterLevelMeters = 3.1, FlowRateMinute = 75.8 }
         ];
     }
-}
 
+    public class Ticket
+    {
+        public int Id { get; set; }
+        public string? Description { get; set; }
+        public required Customer Customer { get; set; }
+        public bool Resolved { get; set; }
+    }
+
+    public class Customer
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public DateTime? LastUpdated { get; set; }
+    }
+
+    public static List<Ticket> GetTickets()
+    {
+        return [
+            new Ticket { Id = 1, Description = "Issue with water flow", Customer = new Customer { Id = 1, Name = "John Doe" }, Resolved = false },
+            new Ticket { Id = 2, Description = "Flooding in basement", Customer = new Customer { Id = 2, Name = "Jane Smith" }, Resolved = true },
+            new Ticket { Id = 3, Description = "Water level sensor malfunction", Customer = new Customer { Id = 3, Name = "Alice Johnson" }, Resolved = false },
+            new Ticket { Id = 4, Description = "Leak in the main pipe", Customer = new Customer { Id = 4, Name = "Bob Brown" }, Resolved = true },
+            new Ticket { Id = 5, Description = null, Customer = new Customer { Id = 5, Name = "Charlie Davis" }, Resolved = false }
+        ];
+    }
+}
 
