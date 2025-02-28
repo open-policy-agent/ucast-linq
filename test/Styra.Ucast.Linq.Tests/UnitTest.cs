@@ -5,12 +5,13 @@ namespace Styra.Ucast.Linq.Tests;
 public class UnitTestFieldExprs
 {
     private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Theory]
     [MemberData(nameof(EqTestData))]
     public void TestEq(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -18,7 +19,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(NeTestData))]
     public void TestNe(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -26,7 +27,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(GtTestData))]
     public void TestGt(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -34,7 +35,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(GeTestData))]
     public void TestGe(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -42,7 +43,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(LtTestData))]
     public void TestLt(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -50,7 +51,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(LeTestData))]
     public void TestLe(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -58,7 +59,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(InTestData))]
     public void TestIn(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -66,7 +67,7 @@ public class UnitTestFieldExprs
     [MemberData(nameof(NinTestData))]
     public void TestNin(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(result, expected);
     }
 
@@ -143,16 +144,100 @@ public class UnitTestFieldExprs
     }
 }
 
+public class UnitTestFieldExprsWithCustomNameBinding
+{
+    private static readonly List<UnitTestDataSource.HydrologyData> hydrologyTestData = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.Ticket> ticketTestData = UnitTestDataSource.GetTickets();
+
+    [Theory]
+    [MemberData(nameof(NinTestData))]
+    public void TestNinWithCustomMapping(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
+    {
+        MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.id", "data.id"},
+            {"hydro.name", "data.name"},
+            {"hydro.flood_stage", "data.flood_stage"},
+            {"hydro.water_level_meters", "data.water_level_meters"},
+        }, "data");
+        var result = hydrologyTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
+    [Theory]
+    [MemberData(nameof(NestedNinTestData))]
+    public void TestNestedNinWithCustomMapping(UCASTNode node, List<UnitTestDataSource.Ticket> expected)
+    {
+        MappingConfiguration<UnitTestDataSource.Ticket> mapping = new(new Dictionary<string, string> {
+            {"t.id", "ticket.id"},
+            {"c.id", "ticket.customer.id"},
+            {"c.name", "ticket.customer.name"},
+        }, "ticket");
+        var result = ticketTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
+    [Theory]
+    [MemberData(nameof(NinTestData))]
+    public void TestNinWithCustomEFCoreMapping(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
+    {
+        EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.id", "data.id"},
+            {"hydro.name", "data.name"},
+            {"hydro.flood_stage", "data.flood_stage"},
+            {"hydro.water_level_meters", "data.water_level_meters"},
+        }, "data");
+        var result = hydrologyTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
+    [Theory]
+    [MemberData(nameof(NestedNinTestData))]
+    public void TestNestedNinWithCustomEFCoreMapping(UCASTNode node, List<UnitTestDataSource.Ticket> expected)
+    {
+        EFCoreMappingConfiguration<UnitTestDataSource.Ticket> mapping = new(new Dictionary<string, string> {
+            {"t.id", "ticket.id"},
+            {"c.id", "ticket.customer.id"},
+            {"c.name", "ticket.customer.name"},
+        }, "ticket");
+        var result = ticketTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
+    public static IEnumerable<object[]> NinTestData()
+    {
+        {
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.name", Value = new List<object>() { null! } }, hydrologyTestData.Where(d => !new List<object>() { null! }.Contains(d.Name!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.name", Value = new List<object>() { "River Alpha", "Lake Beta" } }, hydrologyTestData.Where(d => !new List<object> { "River Alpha", "Lake Beta" }.Contains(d.Name!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.id", Value = new List<object>() { 2, 5 } }, hydrologyTestData.Where(d => !new List<object>() { 2, 5 }.Contains(d.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.id", Value = new List<object>() { (long)2, (long)5 } }, hydrologyTestData.Where(d => !new List<object>() { (long)2, (long)5 }.Contains((long)d.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.flood_stage", Value = new List<object>() { true } }, hydrologyTestData.Where(d => !new List<object>() { true }.Contains(d.FloodStage)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "hydro.water_level_meters", Value = new List<object>() { 2.5, 5.8 } }, hydrologyTestData.Where(d => !new List<object>() { 2.5, 5.8 }.Contains(d.WaterLevelMeters)).ToList() };
+        }
+    }
+
+    public static IEnumerable<object[]> NestedNinTestData()
+    {
+        {
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "t.id", Value = new List<object>() { 1, 3 } }, ticketTestData.Where(d => !new List<object>() { 1, 3 }.Contains(d.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "ticket.description", Value = new List<object>() { null! } }, ticketTestData.Where(d => !new List<object>() { null! }.Contains(d.Description!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "c.name", Value = new List<object>() { "John Doe", "Jane Smith" } }, ticketTestData.Where(d => !new List<object> { "John Doe", "Jane Smith" }.Contains(d.Customer.Name!)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "c.id", Value = new List<object>() { 2, 5 } }, ticketTestData.Where(d => !new List<object>() { 2, 5 }.Contains(d.Customer.Id)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "c.id", Value = new List<object>() { (long)2, (long)5 } }, ticketTestData.Where(d => !new List<object>() { (long)2, (long)5 }.Contains((long)d.Customer.Id)).ToList() };
+        }
+    }
+}
+
 // Compound operations, with expected results from equivalent LINQ queries.
 public class UnitTestCompoundExprs
 {
     private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Theory]
     [MemberData(nameof(AndTestData))]
     public void TestAnd(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -160,7 +245,7 @@ public class UnitTestCompoundExprs
     [MemberData(nameof(OrTestData))]
     public void TestOr(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -168,7 +253,7 @@ public class UnitTestCompoundExprs
     [MemberData(nameof(AndNestedTestData))]
     public void TestAndNested(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -176,7 +261,7 @@ public class UnitTestCompoundExprs
     [MemberData(nameof(OrNestedTestData))]
     public void TestOrNested(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
     {
-        var result = testdata.AsQueryable().ApplyUCASTFilter(node, UnitTestDataSource.HydrologyDataMapping).ToList();
+        var result = testdata.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(expected, result, true);
     }
 
@@ -254,6 +339,7 @@ public class UnitTestREADMEExample
 public class UnitTestMasking
 {
     private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Fact]
     public void TestMaskingReplace()
@@ -263,7 +349,55 @@ public class UnitTestMasking
             { "data.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
         };
 
-        var maskedList = testdata.MaskElements(maskingRules, UnitTestDataSource.HydrologyDataMapping);
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
+
+    [Fact]
+    public void TestMaskingReplaceWithNamesToProperties()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "hydro.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.name", "data.name"},
+        }, "data");
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
+}
+
+public class UnitTestMaskingEFCore
+{
+    private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
+
+    [Fact]
+    public void TestMaskingReplace()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "data.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
+
+    [Fact]
+    public void TestMaskingReplaceWithNamesToProperties()
+    {
+        Dictionary<string, MaskingFunc> maskingRules = new()
+        {
+            { "hydro.name", new MaskingFunc() { Replace = new() { Value = "***" } } },
+        };
+
+        EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.name", "data.name"},
+        }, "data");
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
         Assert.All(maskedList, item => Assert.Equal("***", item.Name));
     }
 }
@@ -271,8 +405,6 @@ public class UnitTestMasking
 // AI-generated, used to provide a dataset for LINQ queries.
 public class UnitTestDataSource
 {
-    public static readonly MappingConfiguration<HydrologyData> HydrologyDataMapping = new(prefix: "data");
-
     public class HydrologyData
     {
         public int Id { get; set; }
@@ -293,6 +425,38 @@ public class UnitTestDataSource
             new HydrologyData { Id = 5, Name = null, LastUpdated = new DateTime(2024, 12, 6, 18, 30, 0), FloodStage = true, WaterLevelMeters = 3.1, FlowRateMinute = 75.8 }
         ];
     }
-}
 
+    public class Ticket
+    {
+        public int Id { get; set; }
+        public string? Description { get; set; }
+        public required Customer Customer { get; set; }
+        public bool Resolved { get; set; }
+        public User? UserNavigation { get; set; }
+    }
+
+    public class Customer
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public DateTime? LastUpdated { get; set; }
+    }
+
+    public class User
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+    }
+
+    public static List<Ticket> GetTickets()
+    {
+        return [
+            new Ticket { Id = 1, Description = "Issue with water flow", Customer = new Customer { Id = 1, Name = "John Doe" }, Resolved = false },
+            new Ticket { Id = 2, Description = "Flooding in basement", Customer = new Customer { Id = 2, Name = "Jane Smith" }, Resolved = true },
+            new Ticket { Id = 3, Description = "Water level sensor malfunction", Customer = new Customer { Id = 3, Name = "Alice Johnson" }, Resolved = false },
+            new Ticket { Id = 4, Description = "Leak in the main pipe", Customer = new Customer { Id = 4, Name = "Bob Brown" }, Resolved = true },
+            new Ticket { Id = 5, Description = null, Customer = new Customer { Id = 5, Name = "Charlie Davis" }, UserNavigation = new User { Id = 5, Name = "Eratosthenes" }, Resolved = false }
+        ];
+    }
+}
 
