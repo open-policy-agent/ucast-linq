@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3.1
+
+This release includes a bugfix for name mapping in the `EFCoreMappingConfiguration` class, ensuring that property names already have the `_navigation` suffix truncated before it attempts to map user-provided UCAST field names to object properties.
+
+
 ## 0.3.0
 
 This release includes a complete rework of how name mapping and LINQ property lookups are generated, fixing several pernicious bugs around name mapping.
