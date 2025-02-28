@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3.0
+
+This release includes a complete rework of how name mapping and LINQ property lookups are generated, fixing several pernicious bugs around name mapping.
+
+
 ## 0.2.0
 
 This release includes numerous small cleanups and refactors, and adds initial support for column masking of datasets!
