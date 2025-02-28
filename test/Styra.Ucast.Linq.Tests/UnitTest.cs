@@ -176,6 +176,33 @@ public class UnitTestFieldExprsWithCustomNameBinding
         Assert.Equivalent(result, expected);
     }
 
+    [Theory]
+    [MemberData(nameof(NinTestData))]
+    public void TestNinWithCustomEFCoreMapping(UCASTNode node, List<UnitTestDataSource.HydrologyData> expected)
+    {
+        EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.id", "data.id"},
+            {"hydro.name", "data.name"},
+            {"hydro.flood_stage", "data.flood_stage"},
+            {"hydro.water_level_meters", "data.water_level_meters"},
+        }, "data");
+        var result = hydrologyTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
+    [Theory]
+    [MemberData(nameof(NestedNinTestData))]
+    public void TestNestedNinWithCustomEFCoreMapping(UCASTNode node, List<UnitTestDataSource.Ticket> expected)
+    {
+        EFCoreMappingConfiguration<UnitTestDataSource.Ticket> mapping = new(new Dictionary<string, string> {
+            {"t.id", "ticket.id"},
+            {"c.id", "ticket.customer.id"},
+            {"c.name", "ticket.customer.name"},
+        }, "ticket");
+        var result = ticketTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
+        Assert.Equivalent(result, expected);
+    }
+
     public static IEnumerable<object[]> NinTestData()
     {
         {
@@ -405,6 +432,7 @@ public class UnitTestDataSource
         public string? Description { get; set; }
         public required Customer Customer { get; set; }
         public bool Resolved { get; set; }
+        public User? UserNavigation { get; set; }
     }
 
     public class Customer
@@ -414,6 +442,12 @@ public class UnitTestDataSource
         public DateTime? LastUpdated { get; set; }
     }
 
+    public class User
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+    }
+
     public static List<Ticket> GetTickets()
     {
         return [
@@ -421,7 +455,7 @@ public class UnitTestDataSource
             new Ticket { Id = 2, Description = "Flooding in basement", Customer = new Customer { Id = 2, Name = "Jane Smith" }, Resolved = true },
             new Ticket { Id = 3, Description = "Water level sensor malfunction", Customer = new Customer { Id = 3, Name = "Alice Johnson" }, Resolved = false },
             new Ticket { Id = 4, Description = "Leak in the main pipe", Customer = new Customer { Id = 4, Name = "Bob Brown" }, Resolved = true },
-            new Ticket { Id = 5, Description = null, Customer = new Customer { Id = 5, Name = "Charlie Davis" }, Resolved = false }
+            new Ticket { Id = 5, Description = null, Customer = new Customer { Id = 5, Name = "Charlie Davis" }, UserNavigation = new User { Id = 5, Name = "Eratosthenes" }, Resolved = false }
         ];
     }
 }

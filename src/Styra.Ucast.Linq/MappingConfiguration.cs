@@ -146,7 +146,7 @@ public class MappingConfiguration<T>
         if (src == null) return null;
         if (propName == null) return null;
 
-        if (propName.Contains('.')) //complex type, nested
+        if (propName.Contains('.')) // complex type, nested
         {
             var temp = propName.Split(['.'], 2);
             var outer = GetPropertyValue(src, temp[0]);
@@ -179,30 +179,21 @@ public class MappingConfiguration<T>
         return type.IsClass || (type.IsValueType && !type.IsPrimitive && !type.IsEnum);
     }
 
-    private static bool IsReadableMember(MemberInfo member)
-    {
-        if (member is FieldInfo)
-            return true;
-        if (member is PropertyInfo property)
-            return property.CanRead;
-        return false;
-    }
-
     /// <summary>
     /// Generates a "raw" UCAST -> property names mapping for the type.
     /// Expands down one level, to pick up properties of struct member fields.
     /// </summary>
     /// <returns>The dictionary mapping UCAST field names to property names of the object.</returns>
-    private static Dictionary<string, string> GetUCASTToPropertyNamesMapping()
+    protected static Dictionary<string, string> GetUCASTToPropertyNamesMapping()
     {
-        var properties = typeof(T).GetProperties(BindingFlags.DeclaredOnly |
-            BindingFlags.Public | BindingFlags.Instance);
+        var properties = typeof(T).GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
         Dictionary<string, string> result = new(properties.Length);
 
         foreach (var property in properties)
         {
             var snakeCasedProperty = property.Name.ToSnakeCase();
             result[snakeCasedProperty] = property.Name;
+
             Type propType = property.PropertyType;
             if (IsClassOrStruct(propType))
             {
@@ -217,10 +208,9 @@ public class MappingConfiguration<T>
         return result;
     }
 
-    private static Dictionary<string, string> GetUCASTToPropertyNamesMapping(Type type)
+    protected static Dictionary<string, string> GetUCASTToPropertyNamesMapping(Type type)
     {
-        var properties = type.GetProperties(BindingFlags.DeclaredOnly |
-            BindingFlags.Public | BindingFlags.Instance);
+        var properties = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
         Dictionary<string, string> result = new(properties.Length);
 
         foreach (var property in properties)
@@ -262,34 +252,24 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
     /// <param name="prefix">Name of the LINQ data source, as it will appear in UCAST field references. Used as a prefix for the generated property mappings.</param>
     public EFCoreMappingConfiguration(Dictionary<string, string>? namesToProperties = null, string? prefix = null) : base(namesToProperties, prefix)
     {
+        namePrefix = prefix ?? namePrefix;
         foreach (var kv in baseNameMappings)
         {
             var key = $"{namePrefix}.{kv.Key}";
             nameMappings[key] = kv.Value;
-            var parts = kv.Value.Split('.');
-            // Build up the linq expression by wrapping each successive member access.
-            linqMappingsCache[key] = param => Expression.Property(param, parts[0]);
-            for (var i = 1; i < parts.Length; i++)
-            {
-                var part = parts[i];
-                linqMappingsCache[key] = param => Expression.Property(linqMappingsCache[key](param), part);
-            }
+            linqMappingsCache[key] = param => Expression.Property(param, kv.Value);
         }
         if (namesToProperties is not null)
         {
             foreach (var mapping in namesToProperties)
             {
+                nameMappings[mapping.Key] = nameMappings[mapping.Value];
                 // Split string on '.' characters, and build out the Expression.Property() chain accordingly.
                 var parts = mapping.Value.Split('.');
-                var startIdx = parts[0] == namePrefix ? 1 : 0;
-                nameMappings[mapping.Key] = nameMappings[mapping.Value];
+
                 // Build up the linq expression by wrapping each successive member access.
-                linqMappingsCache[mapping.Key] = param => Expression.Property(param, parts[startIdx]);
-                for (var i = startIdx + 1; i < parts.Length; i++)
-                {
-                    var part = parts[i];
-                    linqMappingsCache[mapping.Key] = param => Expression.Property(linqMappingsCache[mapping.Key](param), part);
-                }
+                // Example params when evaluated for "ticket.customer.id": (ParameterExpression, {"ticket"}, {"customer", "id"})
+                linqMappingsCache[mapping.Key] = param => NestedPropertyAccessFromParts(param, parts[..1], parts[1..]);
             }
         }
     }
@@ -299,40 +279,20 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
     /// This version is updated to handle Navigation types that are common with EF Core.
     /// </summary>
     /// <returns>The dictionary mapping UCAST field names to property names of the object.</returns>
-    private static Dictionary<string, string> GetUCASTToPropertyNamesMapping()
+    private static new Dictionary<string, string> GetUCASTToPropertyNamesMapping()
     {
-        var properties = typeof(T).GetProperties();
-        Dictionary<string, string> result = new(properties.Length);
-
-        foreach (var property in properties)
+        var originals = MappingConfiguration<T>.GetUCASTToPropertyNamesMapping();
+        var result = new Dictionary<string, string>(originals.Count);
+        foreach (var kv in result)
         {
-            var propertyName = property.Name;
-            // Normal properties, or a property just named "navigation" (case invariant) should be processed normally.
-            if (!property.Name.EndsWith("Navigation") || propertyName.Equals("Navigation", StringComparison.CurrentCultureIgnoreCase))
+            var key = kv.Key;
+            // Strip off the "Navigation" / "_navigation" suffix.
+            if (kv.Key.Contains("_navigation"))
             {
-                var snakeCasedProperty = property.Name.ToSnakeCase();
-                result[snakeCasedProperty] = property.Name;
-                continue;
-            }
+                key = key.Replace("_navigation", "");
 
-            // Implicit else: Properties with the "Navigation" suffix are
-            // usually ORM tooling for foreign key/entity lookups in EF Core. We
-            // indirect one level, and enumerate the non-Navigation properties
-            // of that type.
-            propertyName = property.Name[..^"Navigation".Length];
-
-            Type memberType = property.PropertyType;
-            var memberProperties = memberType.GetProperties();
-            foreach (var memberProp in memberProperties)
-            {
-                // Skip cases like "Ticket.CustomerNavigation.TenantNavigation".
-                if (memberProp.Name.EndsWith("Navigation") && !memberProp.Name.Equals("Navigation", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    continue;
-                }
-                var memberPropertyName = memberProp.Name.ToSnakeCase();
-                result[memberPropertyName] = $"{property.Name}.{memberProp.Name}";
             }
+            result[key] = kv.Value;
         }
 
         return result;
