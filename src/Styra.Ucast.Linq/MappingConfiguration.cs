@@ -208,6 +208,11 @@ public class MappingConfiguration<T>
         return result;
     }
 
+    /// <summary>
+    /// Variant of GetUCASTToPropertyNamesMapping, allowing one to provide a type directly as a parameter.
+    /// </summary>
+    /// <param name="type">The type to generate UCAST field names for.</param>
+    /// <returns>The dictionary mapping UCAST field names to property names of the type.</returns>
     protected static Dictionary<string, string> GetUCASTToPropertyNamesMapping(Type type)
     {
         var properties = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
@@ -222,6 +227,7 @@ public class MappingConfiguration<T>
         return result;
     }
 }
+
 /// <summary>
 /// Adds extensions to the name mapping logic, specific to Entity Framework Core model classes.
 /// </summary>
@@ -250,7 +256,7 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
     /// </summary>
     /// <param name="namesToProperties">A dictionary, mapping UCAST field names to property lookups in the object.</param>
     /// <param name="prefix">Name of the LINQ data source, as it will appear in UCAST field references. Used as a prefix for the generated property mappings.</param>
-    public EFCoreMappingConfiguration(Dictionary<string, string>? namesToProperties = null, string? prefix = null) : base(namesToProperties, prefix)
+    public EFCoreMappingConfiguration(Dictionary<string, string>? namesToProperties = null, string? prefix = null) : base(null, prefix)
     {
         namePrefix = prefix ?? namePrefix;
         foreach (var kv in baseNameMappings)
@@ -283,14 +289,13 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
     {
         var originals = MappingConfiguration<T>.GetUCASTToPropertyNamesMapping();
         var result = new Dictionary<string, string>(originals.Count);
-        foreach (var kv in result)
+        foreach (var kv in originals)
         {
             var key = kv.Key;
             // Strip off the "Navigation" / "_navigation" suffix.
-            if (kv.Key.Contains("_navigation"))
+            if (key.Contains("_navigation"))
             {
                 key = key.Replace("_navigation", "");
-
             }
             result[key] = kv.Value;
         }

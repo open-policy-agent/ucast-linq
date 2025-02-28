@@ -198,6 +198,7 @@ public class UnitTestFieldExprsWithCustomNameBinding
             {"t.id", "ticket.id"},
             {"c.id", "ticket.customer.id"},
             {"c.name", "ticket.customer.name"},
+            {"u.name", "ticket.user.name"},
         }, "ticket");
         var result = ticketTestData.AsQueryable().ApplyUCASTFilter(node, mapping).ToList();
         Assert.Equivalent(result, expected);
