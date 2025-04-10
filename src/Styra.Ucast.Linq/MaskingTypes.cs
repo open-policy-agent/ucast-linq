@@ -12,7 +12,7 @@ public struct MaskResult
     [JsonProperty("masks")]
     public Dictionary<string, MaskingFunc>? Masks;
 
-    public override string ToString()
+    public override readonly string ToString()
     {
         return JsonConvert.SerializeObject(this);
     }
@@ -24,8 +24,18 @@ public struct MaskResult
 /// </summary>
 public struct MaskingFunc
 {
+    // Extra machinery is required to allow for the underscore variant of the field.
+    private ReplaceFunc? _replace;
+
+    [JsonProperty("_replace", NullValueHandling = NullValueHandling.Ignore)]
+    public ReplaceFunc? ReplaceAlt { get; set; }
+
     [JsonProperty("replace", NullValueHandling = NullValueHandling.Ignore)]
-    public ReplaceFunc? Replace;
+    public ReplaceFunc? Replace
+    {
+        get { return _replace ?? ReplaceAlt; }
+        set { _replace = value; }
+    }
 
     public struct ReplaceFunc
     {

@@ -92,4 +92,33 @@ public static class EnumerableExtension
         IEnumerable<T> result = source.Select(x => x.MaskElement(maskingRules, config));
         return result;
     }
+
+    /// <summary>
+    /// Masks fields on every element in a collection, using a nested Dictionary of masks, and a name mapping.
+    /// </summary>
+    /// <typeparam name="T">The type of the source collection's elements.</typeparam>
+    /// <param name="source">The collection whose elements' fields will be masked.</param>
+    /// <param name="maskingRules">A dictionary mapping UCAST field names to column masking functions.</param>
+    /// <param name="config">A name mapping config, allowing easy translation of UCAST field names to object fields.</param>
+    /// <returns>A new collection, containing shallow clones of the source collection's object, with all masks applied to each object.</returns>
+    public static IEnumerable<T> MaskElements<T>(this IEnumerable<T> source, Dictionary<string, Dictionary<string, MaskingFunc>>? maskingRules, MappingConfiguration<T> config)
+    {
+        if (maskingRules is null)
+        {
+            return source;
+        }
+        // Prealloc the flattened masking rules dictionary.
+        var flattenedRules = new Dictionary<string, MaskingFunc>(maskingRules.Sum(kv => kv.Value.Count));
+
+        foreach (var tableKV in maskingRules)
+        {
+            foreach (var columnKV in tableKV.Value)
+            {
+                flattenedRules[tableKV.Key + "." + columnKV.Key] = columnKV.Value;
+            }
+        }
+
+        IEnumerable<T> result = source.Select(x => x.MaskElement(flattenedRules, config));
+        return result;
+    }
 }

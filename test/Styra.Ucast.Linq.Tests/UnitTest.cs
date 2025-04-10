@@ -368,6 +368,22 @@ public class UnitTestMasking
         var maskedList = testdata.MaskElements(maskingRules, mapping);
         Assert.All(maskedList, item => Assert.Equal("***", item.Name));
     }
+
+    [Fact]
+    public void TestMaskingReplaceWithNestedDictionary()
+    {
+        Dictionary<string, Dictionary<string, MaskingFunc>> maskingRules = new()
+        {
+            { "hydro", new() { { "name", new MaskingFunc() { Replace = new() { Value = "***" } } }, } },
+        };
+
+
+        MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.name", "data.name"},
+        }, "data");
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
 }
 
 public class UnitTestMaskingEFCore
@@ -396,6 +412,21 @@ public class UnitTestMaskingEFCore
         };
 
         EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
+            {"hydro.name", "data.name"},
+        }, "data");
+        var maskedList = testdata.MaskElements(maskingRules, mapping);
+        Assert.All(maskedList, item => Assert.Equal("***", item.Name));
+    }
+
+    [Fact]
+    public void TestMaskingReplaceWithNestedDictionary()
+    {
+        Dictionary<string, Dictionary<string, MaskingFunc>> maskingRules = new()
+        {
+            { "hydro", new() { { "name", new MaskingFunc() { Replace = new() { Value = "***" } } }, } },
+        };
+
+        MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(new Dictionary<string, string> {
             {"hydro.name", "data.name"},
         }, "data");
         var maskedList = testdata.MaskElements(maskingRules, mapping);
