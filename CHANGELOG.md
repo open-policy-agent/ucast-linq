@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.4.0
+
+This release includes support for using nested objects for describing column masking rules.
+
+Example:
+```json
+{
+  "masks": {
+    "table": {
+      "column1": {"replace": {"value": 2}},
+      "column2": {"replace": {"value": "foo"}},
+    }
+  }
+}
+```
+
+The above JSON object describe a set of column masking rules for `table.colum1` and `table.column2`, without needing the strings concatenated in advance with `.` characters between them.
+
+
 ## 0.3.1
 
 This release includes a bugfix for name mapping in the `EFCoreMappingConfiguration` class, ensuring that property names already have the `_navigation` suffix truncated before it attempts to map user-provided UCAST field names to object properties.
