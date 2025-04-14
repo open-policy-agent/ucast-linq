@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.0
+
+This release includes a bugfix for numeric type handling.
+
+Previously, you could not mix numeric types in UCAST expressions beyond a few basic integer types.
+We now support mixing and matching integer and floating-point types, and will automatically convert values in expressions to use the larger/higher-precision type as needed.
+
+This means you can now run an altered version of the README example with mixed numeric types, and it will work as expected:
+
+```csharp
+int[] numbers = { -1523, 1894, -456, 789, -1002, 345, -1789, 567, 1234, -890, 123, -1456, 1678, -234, 567, -1890, 901, -345, 1567, -789 };
+List<SimpleRecord> collection = [.. numbers.Select(n => new SimpleRecord(n))];
+var expected = collection.Where(x => x.Value >= 1500 || (x.Value < 400 && (x.Value > 0 || x.Value < -1500))).OrderBy(x => x.Value).ToList();
+var conditions = new UCASTNode{
+    Type = "compound",
+    Op = "or",
+    Value = new List<UCASTNode>{
+        new() { Type = "field", Op = "ge", Field = "r.value", Value = 1500.0f }, // float
+        new() { Type = "compound", Op = "and", Value = new List<UCASTNode>{
+            new() { Type = "field", Op = "lt", Field = "r.value", Value = 400L }, // long
+            new() { Type = "compound", Op = "or", Value = new List<UCASTNode>{
+                new() { Type = "field", Op = "gt", Field = "r.value", Value = 0 }, // int
+                new() { Type = "field", Op = "lt", Field = "r.value", Value = -1500.0d }, //double
+            } },
+        } },
+    }
+};
+var result = collection.AsQueryable().ApplyUCASTFilter(conditions, new MappingConfiguration<SimpleRecord>(prefix: "r")).OrderBy(x => x.Value).ToList();
+Assert.Equivalent(expected, result, true);
+```
+
+
 ## 0.4.0
 
 This release includes support for using nested objects for describing column masking rules.
