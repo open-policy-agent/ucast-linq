@@ -337,9 +337,72 @@ public class UnitTestREADMEExample
     }
 }
 
+public class UnitTestTypeConversions
+{
+    public record IntRecord(int Value);
+    public record LongRecord(long Value);
+    public record FloatRecord(float Value);
+    public record DoubleRecord(double Value);
+    public UCASTNode conditions = new()
+    {
+        Type = "compound",
+        Op = "or",
+        Value = new List<UCASTNode>{
+            new() { Type = "field", Op = "ge", Field = "r.value", Value = 1500.0f },
+            new() { Type = "compound", Op = "and", Value = new List<UCASTNode>{
+                new() { Type = "field", Op = "lt", Field = "r.value", Value = 400L },
+                new() { Type = "compound", Op = "or", Value = new List<UCASTNode>{
+                    new() { Type = "field", Op = "gt", Field = "r.value", Value = 0 },
+                    new() { Type = "field", Op = "lt", Field = "r.value", Value = -1500.0d },
+                } },
+            } },
+        }
+    };
+
+    [Fact]
+    public void TestComparisonsVersusIntSource()
+    {
+        int[] numbers = [-1523, 1894, -456, 789, -1002, 345, -1789, 567, 1234, -890, 123, -1456, 1678, -234, 567, -1890, 901, -345, 1567, -789];
+        List<IntRecord> collection = [.. numbers.Select(n => new IntRecord(n))];
+        var expected = collection.Where(x => x.Value >= 1500.0f || (x.Value < 400L && (x.Value > 0 || x.Value < -1500.0d))).OrderBy(x => x.Value).ToList();
+        var result = collection.AsQueryable().ApplyUCASTFilter(conditions, new MappingConfiguration<IntRecord>(prefix: "r")).OrderBy(x => x.Value).ToList();
+        Assert.Equivalent(expected, result, true);
+    }
+
+    [Fact]
+    public void TestComparisonsVersusLongSource()
+    {
+        long[] numbers = [-1523, 1894, -456, 789, -1002, 345, -1789, 567, 1234, -890, 123, -1456, 1678, -234, 567, -1890, 901, -345, 1567, -789];
+        List<LongRecord> collection = [.. numbers.Select(n => new LongRecord(n))];
+        var expected = collection.Where(x => x.Value >= 1500.0f || (x.Value < 400L && (x.Value > 0 || x.Value < -1500.0d))).OrderBy(x => x.Value).ToList();
+        var result = collection.AsQueryable().ApplyUCASTFilter(conditions, new MappingConfiguration<LongRecord>(prefix: "r")).OrderBy(x => x.Value).ToList();
+        Assert.Equivalent(expected, result, true);
+    }
+
+    [Fact]
+    public void TestComparisonsVersusFloatSource()
+    {
+        float[] numbers = [-1523.0f, 1894.0f, -456.0f, 789.0f, -1002.0f, 345.0f, -1789.0f, 567.0f, 1234.0f, -890.0f, 123.0f, -1456.0f, 1678.0f, -234.0f, 567.0f, -1890.0f, 901.0f, -345.0f, 1567.0f, -789.0f];
+        List<FloatRecord> collection = [.. numbers.Select(n => new FloatRecord(n))];
+        var expected = collection.Where(x => x.Value >= 1500.0f || (x.Value < 400L && (x.Value > 0 || x.Value < -1500.0d))).OrderBy(x => x.Value).ToList();
+        var result = collection.AsQueryable().ApplyUCASTFilter(conditions, new MappingConfiguration<FloatRecord>(prefix: "r")).OrderBy(x => x.Value).ToList();
+        Assert.Equivalent(expected, result, true);
+    }
+
+    [Fact]
+    public void TestComparisonsVersusDoubleSource()
+    {
+        double[] numbers = [-1523.0d, 1894.0d, -456.0d, 789.0d, -1002.0d, 345.0d, -1789.0d, 567.0d, 1234.0d, -890.0d, 123.0d, -1456.0d, 1678.0d, -234.0d, 567.0d, -1890.0d, 901.0d, -345.0d, 1567.0d, -789.0d];
+        List<DoubleRecord> collection = [.. numbers.Select(n => new DoubleRecord(n))];
+        var expected = collection.Where(x => x.Value >= 1500.0f || (x.Value < 400L && (x.Value > 0 || x.Value < -1500.0d))).OrderBy(x => x.Value).ToList();
+        var result = collection.AsQueryable().ApplyUCASTFilter(conditions, new MappingConfiguration<DoubleRecord>(prefix: "r")).OrderBy(x => x.Value).ToList();
+        Assert.Equivalent(expected, result, true);
+    }
+}
+
 public class UnitTestMasking
 {
-    private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
     private static readonly MappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Fact]
@@ -388,7 +451,7 @@ public class UnitTestMasking
 
 public class UnitTestMaskingEFCore
 {
-    private static List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
+    private static readonly List<UnitTestDataSource.HydrologyData> testdata = UnitTestDataSource.GetTestHydrologyData();
     private static readonly EFCoreMappingConfiguration<UnitTestDataSource.HydrologyData> mapping = new(prefix: "data");
 
     [Fact]
