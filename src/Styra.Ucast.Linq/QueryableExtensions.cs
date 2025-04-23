@@ -161,12 +161,7 @@ public static class QueryableExtensions
         {
             throw new NullReferenceException();
         }
-        var eq = new UCASTNode
-        {
-            Type = "field",
-            Op = "eq",
-            Field = node.Field,
-        };
+        var eq = new UCASTNode("field", "eq", node.Field);
         var childValues = (List<object>)node.Value;
 
 

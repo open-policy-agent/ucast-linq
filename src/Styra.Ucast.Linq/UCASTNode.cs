@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -65,6 +66,22 @@ public class UCASTNode
     [JsonProperty("value")]
     [JsonConverter(typeof(UCASTNodeValueConverter))]
     public object? Value; // Either another string, or a List<UCASTNode>.
+
+    // This default constructor ensures we can still build UCASTNode types with
+    // object initializers, without losing the contract of the required members.
+    public UCASTNode() { }
+
+    // This embellished constructor is an escape hatch for inheriting types, so
+    // that they can invoke a base() constructor without exploding from the
+    // required members.
+    [SetsRequiredMembers]
+    public UCASTNode(string type, string op, string? field = null, object? value = null)
+    {
+        Type = type;
+        Op = op;
+        Field = field;
+        Value = value;
+    }
 }
 
 public class UCASTNodeValueConverter : JsonConverter
