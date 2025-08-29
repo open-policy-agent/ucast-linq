@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Cryptography;
-using Microsoft.VisualBasic;
 
-namespace Styra.Ucast.Linq;
+namespace OpenPolicyAgent.Ucast.Linq;
 
 public class NameToLINQExpressionConfiguration : Dictionary<string, Func<ParameterExpression, Expression>>;
 

@@ -23,7 +23,7 @@ concurrency:
 jobs:
   publish-docs:
     env:
-      STYRA_GH_PAGES_URL: https://styrainc.github.io/ucast-linq
+      GH_PAGES_URL: https://open-policy-agent.github.io/ucast-linq
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

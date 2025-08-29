@@ -40,14 +40,14 @@ jobs:
       - name: Get latest version from NuGet
         id: nuget_version
         run: |
-          $latestVersion = (Invoke-WebRequest -Uri "https://api.nuget.org/v3-flatcontainer/styra.ucast.linq/index.json" | ConvertFrom-Json).versions[-1]
+          $latestVersion = (Invoke-WebRequest -Uri "https://api.nuget.org/v3-flatcontainer/openpolicyagent.ucast.linq/index.json" | ConvertFrom-Json).versions[-1]
           echo "LATEST_VERSION=$latestVersion" >> $env:GITHUB_OUTPUT
         shell: pwsh
 
       - name: Get current version
         id: current_version
         run: |
-          $currentVersion = (Select-Xml -Path src/Styra.Ucast.Linq/Styra.Ucast.Linq.csproj -XPath "//PackageVersion").Node.InnerText
+          $currentVersion = (Select-Xml -Path src/OpenPolicyAgent.Ucast.Linq/OpenPolicyAgent.Ucast.Linq.csproj -XPath "//PackageVersion").Node.InnerText
           echo "CURRENT_VERSION=$currentVersion" >> $env:GITHUB_OUTPUT
         shell: pwsh
 

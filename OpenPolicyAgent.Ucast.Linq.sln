@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5FEAA946-24F2-4E7E-A5E9-154C7C57CA4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPolicyAgent.Ucast.Linq", "src\OpenPolicyAgent.Ucast.Linq\OpenPolicyAgent.Ucast.Linq.csproj", "{C852E028-CADD-4368-A7DF-1E42B0E186DB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{64E9A9C8-3107-4863-BCCE-BC85FC16B4EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPolicyAgent.Ucast.Linq.Tests", "test\OpenPolicyAgent.Ucast.Linq.Tests\OpenPolicyAgent.Ucast.Linq.Tests.csproj", "{20072F13-CC7E-4448-ACF5-424D86FB0AF3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C852E028-CADD-4368-A7DF-1E42B0E186DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C852E028-CADD-4368-A7DF-1E42B0E186DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C852E028-CADD-4368-A7DF-1E42B0E186DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C852E028-CADD-4368-A7DF-1E42B0E186DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20072F13-CC7E-4448-ACF5-424D86FB0AF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20072F13-CC7E-4448-ACF5-424D86FB0AF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20072F13-CC7E-4448-ACF5-424D86FB0AF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20072F13-CC7E-4448-ACF5-424D86FB0AF3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C852E028-CADD-4368-A7DF-1E42B0E186DB} = {5FEAA946-24F2-4E7E-A5E9-154C7C57CA4D}
+		{20072F13-CC7E-4448-ACF5-424D86FB0AF3} = {64E9A9C8-3107-4863-BCCE-BC85FC16B4EF}
+	EndGlobalSection
+EndGlobal

@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <PackageId>Styra.Ucast.Linq</PackageId>
+    <PackageId>OpenPolicyAgent.Ucast.Linq</PackageId>
     <Version>0.6.0</Version>
-    <Authors>Styra</Authors>
+    <Authors>The OPA Authors</Authors>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>1591</NoWarn>
-    <RepositoryUrl>https://github.com/StyraInc/ucast-linq</RepositoryUrl>
-    <PackageProjectUrl>https://docs.styra.com/sdk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/open-policy-agent/ucast-linq</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/open-policy-agent/ucast-linq</PackageProjectUrl>
     <PackageLicenseExpression>APACHE-2.0</PackageLicenseExpression>
   </PropertyGroup>
 

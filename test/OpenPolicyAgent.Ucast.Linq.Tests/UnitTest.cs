@@ -1,5 +1,5 @@
 // This file contains basic unit tests for the library.
-namespace Styra.Ucast.Linq.Tests;
+namespace OpenPolicyAgent.Ucast.Linq.Tests;
 
 // Field operations, across all JSON primitive types (null, bool, int, double, string), with expected results from equivalent LINQ queries.
 public class UnitTestFieldExprs

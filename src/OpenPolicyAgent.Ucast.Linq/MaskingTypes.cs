@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Styra.Ucast.Linq;
+namespace OpenPolicyAgent.Ucast.Linq;
 
 /// <summary>
 /// The JSON wrapper object for column masking responses.

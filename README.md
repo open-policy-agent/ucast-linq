@@ -1,10 +1,10 @@
-# Styra UCAST integration for LINQ
+# EOPA Data Filters Support - C# UCAST integration for LINQ
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![NuGet Version](https://img.shields.io/nuget/v/Styra.Ucast.Linq?style=flat&color=%2324b6e0)](https://www.nuget.org/packages/Styra.Ucast.Linq/)
+[![NuGet Version](https://img.shields.io/nuget/v/OpenPolicyAgent.Ucast.Linq?style=flat&color=%2324b6e0)](https://www.nuget.org/packages/OpenPolicyAgent.Ucast.Linq/)
 
 > [!IMPORTANT]
-> The reference documentation for this library is available at https://styrainc.github.io/ucast-linq
+> The reference documentation for this library is available at https://open-policy-agent.github.io/ucast-linq
 
 
 ## Installation
@@ -12,7 +12,7 @@
 ### Nuget
 
 ```bash
-dotnet add package Styra.Ucast.Linq
+dotnet add package OpenPolicyAgent.Ucast.Linq
 ```
 
 
@@ -55,7 +55,7 @@ Using this library, the same filters can be constructed dynamically using UCAST 
 ```csharp
 using System;
 using System.Linq;
-using Styra.Ucast.Linq;
+using OpenPolicyAgent.Ucast.Linq;
 
 public record SimpleRecord(int Value);
 
@@ -100,5 +100,4 @@ SimpleRecord { Value = 1894 }
 
 ## Community
 
-For questions, discussions and announcements related to Styra products, services and open source projects, please join
-the Styra community on [Slack](https://communityinviter.com/apps/styracommunity/signup)!
+For questions, discussions, and announcements, please join the OPA community on [Slack](https://slack.openpolicyagent.org/)!

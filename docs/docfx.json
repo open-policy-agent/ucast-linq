@@ -17,8 +17,8 @@
       }
     ],
     "globalMetadata": {
-      "_appName": "Styra UCAST integration for LINQ",
-      "_appTitle": "Styra UCAST integration for LINQ",
+      "_appName": "EOPA Data Filters - UCAST integration for LINQ",
+      "_appTitle": "EOPA Data Filters - UCAST integration for LINQ",
       "_enableSearch": true,
       "pdf": false
     },
@@ -43,7 +43,7 @@
           "files": [
             "*.csproj"
           ],
-          "src": "../src/Styra.Ucast.Linq"
+          "src": "../src/OpenPolicyAgent.Ucast.Linq"
         }
       ]
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Styra.Ucast.Linq;
+namespace OpenPolicyAgent.Ucast.Linq;
 
 public static class EnumerableExtension
 {
