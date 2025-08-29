@@ -24,7 +24,7 @@
 
   <!-- Local library reference -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Styra.Ucast.Linq\Styra.Ucast.Linq.csproj" />
+    <ProjectReference Include="..\..\src\OpenPolicyAgent.Ucast.Linq\OpenPolicyAgent.Ucast.Linq.csproj" />
   </ItemGroup>
 
 </Project>

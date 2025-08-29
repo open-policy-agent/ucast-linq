@@ -5,7 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Styra.Ucast.Linq;
+namespace OpenPolicyAgent.Ucast.Linq;
 
 /// <summary>
 /// The UCASTNode class is used to represent UCAST conditions trees.<br />

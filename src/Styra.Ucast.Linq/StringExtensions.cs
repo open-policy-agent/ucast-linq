@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace Styra.Ucast.Linq;
+namespace OpenPolicyAgent.Ucast.Linq;
 
 public static class StringExtensions
 {
