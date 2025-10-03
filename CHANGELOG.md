@@ -3,9 +3,9 @@
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.7.0
+## 0.7.0, 0.7.1
 
-This release contains release engineering improvements, and no significant code or dependency changes.
+These releases contain release engineering improvements, and no significant code or dependency changes.
 
 
 ## 0.6.0
