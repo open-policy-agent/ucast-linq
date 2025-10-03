@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7.0
+
+This release contains release engineering improvements, and no significant code or dependency changes.
+
+
 ## 0.6.0
 
 This release includes additional constructor options for the `UCASTNode` class. Previously, no constructor was defined, which interfered with initialization of its `required` members in derived classes. Now, two options are available: a default parameterless constructor, and a fully-parametrized constructor.
