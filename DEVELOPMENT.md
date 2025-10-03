@@ -5,28 +5,20 @@
 On every commit merged to `main`, the docs will automatically be rebuilt using DocFX, and then published using Github Pages as a "Deployment", similar to how the `open-policy-agent/opa-csharp` repo publishes its reference docs.
 
 
-## Release workflows
+## Release workflow
 
-### Minor changes
+The release workflow for this repository is modeled on the other `open-policy-agent` C# projects, and relies 
 
-If you are doing minor bugfixes, simply merge your PRs to `main` after bumping the version in `src/OpenPolicyAgent.Ucast.Linq/OpenPolicyAgent.Ucast.Linq.csproj` (the main project file).
-The release automation will then discover that the version differs from the latest version on NuGet, and will automatically publish the package after building and running tests.
+To create a release:
+ - Create a new branch/PR.
+ - Ensure at least one commit on the branch matches the case-insensitive regex `^Release .*` (Example: `Release v0.0.1`)
+ - Update `CHANGELOG.md` with an entry for that release, describing the changes.
+ - Update the `.csproj` file's version tag.
 
+The `pull-request` automation *should* automatically check each of those three places, and report the version numbers it finds in a PR comment.
 
-### Major changes
+After merging the release PR, push up a tag for that version. (Example: `git checkout main && git pull && git tag v0.0.1`)
+Make sure you've tagged the right commit before pushing up the tag!
 
-If you are doing major changes, adding features, or fixing major bugs, do the same steps as mentioned above for the "Minor changes" workflow, but after merging, push up a release PR, and a tag, as detailed below.
-
-Example:
- - The `.csproj` file version is bumped from `0.2.42` to `0.3.0`.
- - Create a git branch named `release-v0.3.0`.
-   - Add a `CHANGELOG.md` entry:
-    ```md
-    ## 0.3.0
-
-    My significant changes...
-    ```
- - Push up the branch to Github: `git push origin release-v0.3.0`
- - Create a PR.
- - After merging the PR, push up the tag `v0.3.0`, (e.g. `git checkout main && git pull && git tag v0.3.0 && git push origin v0.3.0`)
- - Release automation will automatically pluck out the latest release notes, and use them as the body text for a Github Release.
+Once the tag is pushed, a draft Github Release will be created (requires human intervention to actually publish).
+The package will be pushed up to NuGet automatically in a separate Github Actions job.
