@@ -107,9 +107,9 @@ public static class QueryableExtensions
     /// <param name="node">Current UCAST node in the conditions tree.</param>
     /// <param name="property">Derefered property lookup expression on the LINQ data source.</param>
     /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
-    /// <returns>Result, a LINQ Expression (Usually a BinaryExpression).</returns>
+    /// <returns>Result, a LINQ BinaryExpression.</returns>
     /// <exception cref="ArgumentException">Thrown when arguments are of incompatible types.</exception>
-    private static Expression BuildFieldExpressionFromProperty<T>(UCASTNode node, Expression property, MappingConfiguration<T> mapper)
+    private static BinaryExpression BuildFieldExpressionFromProperty<T>(UCASTNode node, Expression property, MappingConfiguration<T> mapper)
     {
         Expression value = Expression.Constant(node.Value);
 
