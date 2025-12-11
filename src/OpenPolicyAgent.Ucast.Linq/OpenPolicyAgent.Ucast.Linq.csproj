@@ -19,6 +19,6 @@
     <None Include="../../docs/*" Pack="true" PackagePath="/docs" />
 
     <PackageReference Include="newtonsoft.json" Version="13.0.4" />
-    <PackageReference Include="nodatime" Version="3.2.2" />
+    <PackageReference Include="nodatime" Version="3.2.3" />
   </ItemGroup>
 </Project>
