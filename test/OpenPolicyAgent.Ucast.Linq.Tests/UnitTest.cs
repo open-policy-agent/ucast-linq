@@ -79,6 +79,7 @@ public class UnitTestFieldExprs
         yield return new object[] { new UCASTNode { Type = "field", Op = "eq", Field = "data.id", Value = (long)2 }, testdata.Where(d => d.Id == 2).ToList() };
         yield return new object[] { new UCASTNode { Type = "field", Op = "eq", Field = "data.flood_stage", Value = true }, testdata.Where(d => d.FloodStage).ToList() };
         yield return new object[] { new UCASTNode { Type = "field", Op = "eq", Field = "data.water_level_meters", Value = 5.8 }, testdata.Where(d => d.WaterLevelMeters == 5.8).ToList() };
+        yield return new object[] { new UCASTNode { Type = "field", Op = "eq", Field = "data.uuid", Value = "123e4567-e89b-12d3-a456-426614174000" }, testdata.Where(d => d.Uuid == new Guid("123e4567-e89b-12d3-a456-426614174000")).ToList() };
     }
 
     public static IEnumerable<object[]> NeTestData()
@@ -89,6 +90,7 @@ public class UnitTestFieldExprs
         yield return new object[] { new UCASTNode { Type = "field", Op = "ne", Field = "data.id", Value = (long)2 }, testdata.Where(d => d.Id != 2).ToList() };
         yield return new object[] { new UCASTNode { Type = "field", Op = "ne", Field = "data.flood_stage", Value = true }, testdata.Where(d => !d.FloodStage).ToList() };
         yield return new object[] { new UCASTNode { Type = "field", Op = "ne", Field = "data.water_level_meters", Value = 5.8 }, testdata.Where(d => d.WaterLevelMeters != 5.8).ToList() };
+        yield return new object[] { new UCASTNode { Type = "field", Op = "ne", Field = "data.uuid", Value = "123e4567-e89b-12d3-a456-426614174000" }, testdata.Where(d => d.Uuid != new Guid("123e4567-e89b-12d3-a456-426614174000")).ToList() };
     }
 
     public static IEnumerable<object[]> GtTestData()
@@ -128,6 +130,7 @@ public class UnitTestFieldExprs
             yield return new object[] { new UCASTNode { Type = "field", Op = "in", Field = "data.id", Value = new List<object>() { (long)2, (long)5 } }, testdata.Where(d => new List<object>() { (long)2, (long)5 }.Contains((long)d.Id)).ToList() };
             yield return new object[] { new UCASTNode { Type = "field", Op = "in", Field = "data.flood_stage", Value = new List<object>() { true } }, testdata.Where(d => new List<object>() { true }.Contains(d.FloodStage)).ToList() };
             yield return new object[] { new UCASTNode { Type = "field", Op = "in", Field = "data.water_level_meters", Value = new List<object>() { 2.5, 5.8 } }, testdata.Where(d => new List<object>() { 2.5, 5.8 }.Contains(d.WaterLevelMeters)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "in", Field = "data.uuid", Value = new List<object>() { "123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174001" } }, testdata.Where(d => new List<object>() { new Guid("123e4567-e89b-12d3-a456-426614174000"), new Guid("123e4567-e89b-12d3-a456-426614174001") }.Contains(d.Uuid)).ToList() };
         }
     }
 
@@ -140,6 +143,7 @@ public class UnitTestFieldExprs
             yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "data.id", Value = new List<object>() { (long)2, (long)5 } }, testdata.Where(d => !new List<object>() { (long)2, (long)5 }.Contains((long)d.Id)).ToList() };
             yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "data.flood_stage", Value = new List<object>() { true } }, testdata.Where(d => !new List<object>() { true }.Contains(d.FloodStage)).ToList() };
             yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "data.water_level_meters", Value = new List<object>() { 2.5, 5.8 } }, testdata.Where(d => !new List<object>() { 2.5, 5.8 }.Contains(d.WaterLevelMeters)).ToList() };
+            yield return new object[] { new UCASTNode { Type = "field", Op = "nin", Field = "data.uuid", Value = new List<object>() { "123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174001" } }, testdata.Where(d => !new List<object>() { new Guid("123e4567-e89b-12d3-a456-426614174000"), new Guid("123e4567-e89b-12d3-a456-426614174001") }.Contains(d.Uuid)).ToList() };
         }
     }
 }
@@ -503,6 +507,7 @@ public class UnitTestDataSource
     public class HydrologyData
     {
         public int Id { get; set; }
+        public Guid Uuid { get; set; }
         public string? Name { get; set; }
         public DateTime LastUpdated { get; set; }
         public bool FloodStage { get; set; }
@@ -513,11 +518,11 @@ public class UnitTestDataSource
     public static List<HydrologyData> GetTestHydrologyData()
     {
         return [
-            new HydrologyData { Id = 1, Name = "River Alpha", LastUpdated = new DateTime(2024, 12, 10, 8, 30, 0), FloodStage = false, WaterLevelMeters = 2.5, FlowRateMinute = 100.5 },
-            new HydrologyData { Id = 2, Name = "Lake Beta", LastUpdated = new DateTime(2024, 12, 9, 15, 45, 0), FloodStage = true, WaterLevelMeters = 5.8, FlowRateMinute = null },
-            new HydrologyData { Id = 3, Name = "Stream Gamma", LastUpdated = new DateTime(2024, 12, 8, 12, 0, 0), FloodStage = false, WaterLevelMeters = 0.75, FlowRateMinute = 25.3 },
-            new HydrologyData { Id = 4, Name = "Reservoir Delta", LastUpdated = new DateTime(2024, 12, 7, 9, 15, 0), FloodStage = false, WaterLevelMeters = 15.2, FlowRateMinute = 500.0 },
-            new HydrologyData { Id = 5, Name = null, LastUpdated = new DateTime(2024, 12, 6, 18, 30, 0), FloodStage = true, WaterLevelMeters = 3.1, FlowRateMinute = 75.8 }
+            new HydrologyData { Id = 1, Uuid = new Guid("123e4567-e89b-12d3-a456-426614174000"), Name = "River Alpha", LastUpdated = new DateTime(2024, 12, 10, 8, 30, 0), FloodStage = false, WaterLevelMeters = 2.5, FlowRateMinute = 100.5 },
+            new HydrologyData { Id = 2, Uuid = new Guid("123e4567-e89b-12d3-a456-426614174001"), Name = "Lake Beta", LastUpdated = new DateTime(2024, 12, 9, 15, 45, 0), FloodStage = true, WaterLevelMeters = 5.8, FlowRateMinute = null },
+            new HydrologyData { Id = 3, Uuid = new Guid("123e4567-e89b-12d3-a456-426614174002"), Name = "Stream Gamma", LastUpdated = new DateTime(2024, 12, 8, 12, 0, 0), FloodStage = false, WaterLevelMeters = 0.75, FlowRateMinute = 25.3 },
+            new HydrologyData { Id = 4, Uuid = new Guid("123e4567-e89b-12d3-a456-426614174003"), Name = "Reservoir Delta", LastUpdated = new DateTime(2024, 12, 7, 9, 15, 0), FloodStage = false, WaterLevelMeters = 15.2, FlowRateMinute = 500.0 },
+            new HydrologyData { Id = 5, Uuid = new Guid("123e4567-e89b-12d3-a456-426614174004"), Name = null, LastUpdated = new DateTime(2024, 12, 6, 18, 30, 0), FloodStage = true, WaterLevelMeters = 3.1, FlowRateMinute = 75.8 }
         ];
     }
 

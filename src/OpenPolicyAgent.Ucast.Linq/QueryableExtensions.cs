@@ -36,6 +36,11 @@ public static class QueryableExtensions
         throw new InvalidOperationException($"Cannot determine precedence between {a} and {b}");
     }
 
+    public static bool IsGuidType(Type type)
+    {
+        return type == typeof(Guid);
+    }
+
     /// <summary>
     /// Builds a LINQ Lambda Expression from the UCAST tree, and then invokes
     /// it under a LINQ Where expression on some queryable data source.<br />
@@ -105,7 +110,7 @@ public static class QueryableExtensions
     /// </summary>
     /// <typeparam name="T">The LINQ</typeparam>
     /// <param name="node">Current UCAST node in the conditions tree.</param>
-    /// <param name="property">Derefered property lookup expression on the LINQ data source.</param>
+    /// <param name="property">Deferred property lookup expression on the LINQ data source.</param>
     /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
     /// <returns>Result, a LINQ BinaryExpression.</returns>
     /// <exception cref="ArgumentException">Thrown when arguments are of incompatible types.</exception>
@@ -113,6 +118,10 @@ public static class QueryableExtensions
     {
         Expression value = Expression.Constant(node.Value);
 
+        // If there is a type mismatch in an expression, it is usually from
+        // differing numeric types, or from things like a GUID vs String
+        // comparison. We try to make smart conversions here to ensure types
+        // are matched for the BinaryExpression result.
         Type lhsType = property.Type;
         Type rhsType = value.Type;
         if (lhsType != rhsType)
@@ -128,6 +137,21 @@ public static class QueryableExtensions
                 else if (rhsType != exprType)
                 {
                     value = Expression.Convert(value, exprType);
+                }
+            }
+            // Convert GUID strings automatically when the property is a Guid.
+            // Rego doesn't have native GUID typess, so it'll always be a
+            // GUID-formatted string that the policy is trying to match
+            // against the property.
+            else if (IsGuidType(lhsType) && rhsType == typeof(string))
+            {
+                if (Guid.TryParse(node.Value?.ToString(), out Guid guid))
+                {
+                    value = Expression.Constant(guid);
+                }
+                else
+                {
+                    throw new ArgumentException($"Expected a GUID-formatted string, but got '{node.Value}'");
                 }
             }
         }
@@ -163,7 +187,6 @@ public static class QueryableExtensions
         }
         var eq = new UCASTNode("field", "eq", node.Field);
         var childValues = (List<object>)node.Value;
-
 
         // Iterate over all children, and determine highest-precedent type among
         // them. Convert LHS value if needed. RHS type conversions will happen
