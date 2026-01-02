@@ -6,6 +6,24 @@
 > [!IMPORTANT]
 > The reference documentation for this library is available at https://open-policy-agent.github.io/ucast-linq
 
+## Overview
+
+This library allows users to integrate dynamic data filtering rules into [LINQ queries](https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/introduction-to-linq-queries) that are driven by policies written in Rego.
+
+Below is a high-level sequence diagram of the process:
+```mermaid
+sequenceDiagram
+    C# Application ->>+ OPA: Compile API Request
+    OPA ->>- C# Application: UCAST Result
+
+    C# Application ->> C# Application: Translate UCAST to LINQ Query
+
+    participant Database@{ "type" : "database" }
+    C# Application ->>+ Database: LINQ Query
+    Database ->>- C# Application: Query Results
+```
+
+See the [Development Workflow](docs/dev-workflow.md) docs for more details.
 
 ## Installation
 
@@ -14,7 +32,6 @@
 ```bash
 dotnet add package OpenPolicyAgent.Ucast.Linq
 ```
-
 
 ## Example Usage
 
@@ -96,7 +113,6 @@ SimpleRecord { Value = 1894 }
 ```
 
 </details>
-
 
 ## Community
 
