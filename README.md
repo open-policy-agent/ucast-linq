@@ -73,7 +73,7 @@ var conditions = new UCASTNode { Type = "compound", Op = "or", Value = new List<
 var numbers = new int[] { -1523, 1894, -456, 789, -1002, 345, -1789, 567, 1234, -890, 123, -1456, 1678, -234, 567, -1890, 901, -345, 1567, -789 };
 var collection = numbers.Select(n => new SimpleRecord(n)).ToList();
 var results = collection.AsQueryable()
-                        .ApplyUCASTFilter(conditions, QueryableExtensions.BuildDefaultMapperDictionary<SimpleRecord>("r"))
+                        .ApplyUCASTFilter(conditions, new MappingConfiguration<SimpleRecord>(prefix: "r"))
                         .OrderBy(x => x.Value)
                         .ToList();
 
