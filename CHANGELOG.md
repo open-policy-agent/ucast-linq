@@ -3,6 +3,45 @@
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.0
+
+This release adds initial support for [GUID](https://learn.microsoft.com/en-us/dotnet/api/system.guid) types in data filter queries. It also includes several small dependency bumps, and documentation improvements.
+
+### GUID Support
+
+GUIDs are now supported in for `eq`, `ne`, `in`, and `nin` operators in UCAST.
+This is helpful when dealing with database model classes that have a GUID primary key, among other use cases.
+
+Support is implemented by having the LINQ `Expression` tree builder functions detect cases where GUID-typed properties in the base LINQ object are being compared against strings in the UCAST expression tree, and then converting those strings to appropriate GUID values before attempting comparisons.
+
+#### GUID Support Example
+
+Assuming we have a model class with a `Guid` property/field named `Uuid`, the following sequence is roughly how a Rego expression to match a particular GUID would be translated down into LINQ `Expression`s.
+
+Rego expression:
+```rego
+item.uuid == "123e4567-e89b-12d3-a456-426614174000"
+```
+
+Translated to UCAST:
+```json
+{
+  "type": "field",
+  "operator": "eq",
+  "field": "item.uuid",
+  "value": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+Translated to LINQ `Expressions`:
+```csharp
+Expression.Equal(
+  Expression.Property(/* <ParameterExpression> */, "Uuid"), // Property lookup
+  Expression.Constant(new GUID("123e4567-e89b-12d3-a456-426614174000")) // The constant from the policy
+)
+```
+
+
 ## 0.7.0, 0.7.1
 
 These releases contain release engineering improvements, and no significant code or dependency changes.
